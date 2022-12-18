@@ -13,13 +13,7 @@ impl App{
         configure_text_styles(&cc.egui_ctx);
         Self{
             prompt: "Enter Chat Prompt".to_owned(),
-            response: "Lionel Messi is a professional soccer player who has played for FC Barcelona and the Argentine national team. He is widely considered one of the greatest soccer players of all time.
-
-            Messi began his career with Newell's Old Boys in Argentina before joining Barcelona's youth academy at the age of 13. He made his professional debut for Barcelona in 2004 and has been with the club ever since. Over the course of his career, Messi has won numerous accolades and awards, including 10 La Liga titles, 4 UEFA Champions League titles, and 6 Copas del Rey.
-            
-            In addition to his club success, Messi has also had a successful international career. He has represented Argentina at the World Cup on four occasions and has won numerous individual awards, including the Ballon d'Or (best player in the world award) on six occasions.
-            
-            Overall, Messi's career has been marked by his exceptional skill, scoring ability, and leadership on the pitch. He is known for his speed, dribbling ability, and precise passing, and has scored over 700 goals for both club and country.".to_owned(),
+            response: "".to_owned(),
         }
     }
 }
