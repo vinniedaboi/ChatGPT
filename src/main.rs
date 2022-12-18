@@ -1,5 +1,5 @@
 use eframe::egui;
-use eframe::egui::{TextStyle,FontId,FontFamily};
+use eframe::egui::{TextStyle,FontId,FontFamily,Color32};
 //const CYAN: Color32 = Color32::from_rgb(0, 255, 255);
 //const BLUE: Color32 = Color32::from_rgb(0,0,255);
 pub const PADDING: f32 = 5.0;
@@ -13,7 +13,7 @@ impl App{
         configure_text_styles(&cc.egui_ctx);
         Self{
             prompt: "Enter Chat Prompt".to_owned(),
-            response: "".to_owned(),
+            response: "Rust is pretty pog".to_owned(),
         }
     }
 }
@@ -32,10 +32,9 @@ impl eframe::App for App{
                 println!("Button has been clicked");
             }
             ui.separator();
-            ui.heading("Response");
-            ui.separator();
-            ui.label("OpenAI:");
-            ui.monospace(&mut self.response);
+            ui.heading("OpenAI:");
+            ui.add_space(10.);
+            ui.colored_label(Color32::from_rgb(0,0,255), &mut self.response);
             ui.separator();
             let new_chat = ui.add_sized([785.,40.],egui::Button::new("New Thread"));
             if new_chat.clicked(){
@@ -51,7 +50,7 @@ fn configure_text_styles(ctx: &egui::Context) {
     let mut style = (*ctx.style()).clone();
     style.text_styles = [
         (TextStyle::Heading, FontId::new(26.0, Proportional)),
-        (TextStyle::Body, FontId::new(20.0, Proportional)),
+        (TextStyle::Body, FontId::new(15.0, Proportional)),
         (TextStyle::Monospace, FontId::new(15.0, Monospace)),
         (TextStyle::Button, FontId::new(15.0, Proportional)),
         (TextStyle::Small, FontId::new(8.0, Proportional)),
@@ -91,7 +90,7 @@ fn setup_custom_fonts(ctx: &egui::Context) {
 
 fn main(){
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(800.0, 600.0)),
+        initial_window_size: Some(egui::vec2(800.0, 440.0)),
         ..Default::default()
     };
     eframe::run_native(
