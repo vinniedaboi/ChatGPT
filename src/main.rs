@@ -1,7 +1,7 @@
 use eframe::egui;
 use eframe::egui::{Color32, FontFamily, FontId, TextStyle};
-use std::collections::HashMap;
-
+#[allow(unused_must_use)]
+#[allow(unused_mut)]
 //const CYAN: Color32 = Color32::from_rgb(0, 255, 255);
 //const BLUE: Color32 = Color32::from_rgb(0,0,255);
 pub const PADDING: f32 = 5.0;
@@ -19,10 +19,17 @@ impl App {
         }
     }
 }
-fn buttonclicked() -> Result<(), Box<dyn std::error::Error>> {
-    let resp = reqwest::blocking::get("https://httpbin.org/ip")?
-        .json::<HashMap<String, String>>()?;
-    println!("{:#?}", resp);
+async fn buttonclicked() -> Result<(), Box<dyn std::error::Error>> {
+    let client = reqwest::Client::new();
+    let res = client
+        .get("https://www.rust-lang.org")
+        .header(
+            "Authorization",
+            " Bearer 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",
+        )
+        .send()
+        .await?;
+    println!("{:#?}", res);
     Ok(())
 }
 
@@ -38,7 +45,8 @@ impl eframe::App for App {
                     ui.separator();
                     let process = ui.add_sized([785., 40.], egui::Button::new("-->"));
                     if process.clicked() {
-                        buttonclicked().ok();
+                        let rt = tokio::runtime::Runtime::new().unwrap();
+                        rt.block_on(buttonclicked()).ok();
                     }
                     ui.separator();
                     ui.heading("OpenAI:");
@@ -47,7 +55,8 @@ impl eframe::App for App {
                     ui.separator();
                     let new_chat = ui.add_sized([785., 40.], egui::Button::new("New Thread"));
                     if new_chat.clicked() {
-                        buttonclicked().ok();
+                        let rt = tokio::runtime::Runtime::new().unwrap();
+                        rt.block_on(buttonclicked()).ok();
                     }
                 });
         });
