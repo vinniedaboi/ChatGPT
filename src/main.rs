@@ -1,13 +1,17 @@
 use eframe::egui;
 use eframe::egui::{Color32, FontFamily, FontId, TextStyle};
+use reqwest::header::ACCEPT;
+use reqwest::header::CONTENT_TYPE;
 #[allow(unused_must_use)]
 #[allow(unused_mut)]
 //const CYAN: Color32 = Color32::from_rgb(0, 255, 255);
 //const BLUE: Color32 = Color32::from_rgb(0,0,255);
 pub const PADDING: f32 = 5.0;
+
 struct App {
     prompt: String,
     response: String,
+    _temporary_prompt: String,
 }
 impl App {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
@@ -15,21 +19,50 @@ impl App {
         configure_text_styles(&cc.egui_ctx);
         Self {
             prompt: "Enter Chat Prompt".to_owned(),
-            response: "Rust is pretty pog".to_owned(),
+            response: "ChatGPT response".to_owned(),
+            _temporary_prompt: r#""Say this is a test""#.to_owned(),
         }
     }
 }
-async fn buttonclicked() -> Result<(), Box<dyn std::error::Error>> {
+
+async fn sendresponse(
+    prompt: &mut String,
+    response: &mut String,
+) -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
+    let prompt = format!(r#""{}""#,prompt);
+    let body =
+        r#"{"model": "text-davinci-003", "prompt": {prompt}, "temperature": 0, "max_tokens": 2048}"#;
+    let body = body.replace("{prompt}", &prompt);
     let res = client
-        .get("https://www.rust-lang.org")
+        .post("https://api.openai.com/v1/completions")
+        .body(body)
+        //.form(&params)
+        .header(CONTENT_TYPE, "application/json")
+        .header(ACCEPT, "application/json")
         .header(
             "Authorization",
             " Bearer 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",
         )
         .send()
+        .await?
+        .json::<serde_json::Value>()
         .await?;
-    println!("{:#?}", res);
+    // serde::json::Value
+    let response_text: Option<&str> = res
+        .get("choices")
+        .and_then(|value| value.get(0))
+        .and_then(|value| value.get("text"))
+        .and_then(|value| value.as_str());
+    let response_text = response_text.unwrap();
+    let response_text = response_text.replace("Some","");
+    let response_text = response_text.replace(r#"""#,"");
+    let response_text = response_text.replace("(","");
+    let response_text = response_text.replace(")","");
+    let response_text = response_text.replace("\n","");
+    let response_text = format!("> {}",response_text);
+    println!("Response: {:?}",response_text);
+    *response = response_text;
     Ok(())
 }
 
@@ -46,17 +79,17 @@ impl eframe::App for App {
                     let process = ui.add_sized([785., 40.], egui::Button::new("-->"));
                     if process.clicked() {
                         let rt = tokio::runtime::Runtime::new().unwrap();
-                        rt.block_on(buttonclicked()).ok();
+                        rt.block_on(sendresponse(&mut self.prompt, &mut self.response))
+                            .ok();
                     }
                     ui.separator();
                     ui.heading("OpenAI:");
                     ui.add_space(10.);
-                    ui.colored_label(Color32::from_rgb(0, 0, 255), &mut self.response);
+                    ui.colored_label(Color32::from_rgb(211, 211, 211), &mut self.response);
                     ui.separator();
                     let new_chat = ui.add_sized([785., 40.], egui::Button::new("New Thread"));
                     if new_chat.clicked() {
-                        let rt = tokio::runtime::Runtime::new().unwrap();
-                        rt.block_on(buttonclicked()).ok();
+                        self.response = "ChatGPT response".to_string();
                     }
                 });
         });
